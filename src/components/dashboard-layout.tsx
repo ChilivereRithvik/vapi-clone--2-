@@ -275,7 +275,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </div>
             </ScrollArea>
 
-            <div className="border-t border-border p-4 flex-shrink-0">
+            <div className="border-t  p-1 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   {sidebarCollapsed ? (

@@ -1,6 +1,6 @@
-import type React from "react"
-import { DashboardHeader } from "./dashboard-header"
-import { DashboardNav } from "./dashboard-nav"
+import type React from "react";
+import { DashboardHeader } from "./dashboard-header";
+import { DashboardNav } from "./dashboard-nav";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,5 +9,5 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <DashboardNav />
       <main className="container py-6">{children}</main>
     </div>
-  )
+  );
 }
