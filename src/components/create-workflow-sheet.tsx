@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Link, Router } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const workflowTemplates = [
   {
@@ -59,6 +61,7 @@ export function CreateWorkflowSheet({
   );
   const [workflowName, setWorkflowName] = useState("Lead Qualification Agent");
 
+  const navigate = useNavigate();
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
     const template = workflowTemplates.find((t) => t.id === templateId);
@@ -70,6 +73,9 @@ export function CreateWorkflowSheet({
   const handleCreate = () => {
     onCreateWorkflow(selectedTemplate, workflowName);
     onOpenChange(false);
+    console.log("Navigating to /calls/new");
+    // <Link to="/calls/new" />;
+    navigate("/calls/new");
   };
 
   const selectedTemplateData = workflowTemplates.find(

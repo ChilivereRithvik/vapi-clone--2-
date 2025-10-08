@@ -116,7 +116,17 @@ const projects = [
   { id: "4", name: "Testing", color: "bg-purple-500" },
 ];
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({
+  children,
+  showNavBar = true,
+  showSidebarOnly = false,
+  padding,
+}: {
+  children: React.ReactNode;
+  showNavBar?: boolean;
+  showSidebarOnly?: boolean;
+  padding?: string;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentProject, setCurrentProject] = useState(projects[0]);
@@ -130,6 +140,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const { theme, setTheme } = useTheme();
+  const mainPadding = padding ?? "p-6";
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections((prev) => ({
@@ -344,100 +355,117 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-          <div className="lg:hidden flex items-center justify-between border-b border-border bg-card px-4 h-16 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 px-3">
-                  <div
-                    className={cn("h-2 w-2 rounded-full", currentProject.color)}
-                  />
-                  <span className="text-sm font-medium">
-                    {currentProject.name}
-                  </span>
-                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-56">
-                {projects.map((project) => (
-                  <DropdownMenuItem
-                    key={project.id}
-                    onClick={() => setCurrentProject(project)}
-                    className="flex items-center justify-between"
+        {!showSidebarOnly && (
+          <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+            {showNavBar ? (
+              <>
+                <div className="lg:hidden flex items-center justify-between border-b border-border bg-card px-4 h-16 flex-shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSidebarOpen(true)}
                   >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn("h-2 w-2 rounded-full", project.color)}
-                      />
-                      <span>{project.name}</span>
-                    </div>
-                    {currentProject.id === project.id && (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="w-10" />
-          </div>
-
-          <div className="hidden lg:flex items-center justify-between border-b border-border bg-card px-6 h-16 flex-shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="gap-2 px-3 h-9 bg-transparent"
-                >
-                  <FolderOpen className="h-4 w-4" />
-                  <div
-                    className={cn("h-2 w-2 rounded-full", currentProject.color)}
-                  />
-                  <span className="text-sm font-medium">
-                    {currentProject.name}
-                  </span>
-                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                  Switch Project
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="gap-2 px-3">
+                        <div
+                          className={cn(
+                            "h-2 w-2 rounded-full",
+                            currentProject.color
+                          )}
+                        />
+                        <span className="text-sm font-medium">
+                          {currentProject.name}
+                        </span>
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-56">
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => setCurrentProject(project)}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={cn(
+                                "h-2 w-2 rounded-full",
+                                project.color
+                              )}
+                            />
+                            <span>{project.name}</span>
+                          </div>
+                          {currentProject.id === project.id && (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <div className="w-10" />
                 </div>
-                <DropdownMenuSeparator />
-                {projects.map((project) => (
-                  <DropdownMenuItem
-                    key={project.id}
-                    onClick={() => setCurrentProject(project)}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn("h-2 w-2 rounded-full", project.color)}
-                      />
-                      <span>{project.name}</span>
-                    </div>
-                    {currentProject.id === project.id && (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="flex items-center gap-2">
-              {/* Additional top bar actions can be added here */}
-            </div>
-          </div>
 
-          <ScrollArea className="flex-1 min-h-0">
-            <main className="p-6">{children}</main>
-          </ScrollArea>
-        </div>
+                <div className="hidden lg:flex items-center justify-between border-b border-border bg-card px-6 h-16 flex-shrink-0">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="gap-2 px-3 h-9 bg-transparent"
+                      >
+                        <FolderOpen className="h-4 w-4" />
+                        <div
+                          className={cn(
+                            "h-2 w-2 rounded-full",
+                            currentProject.color
+                          )}
+                        />
+                        <span className="text-sm font-medium">
+                          {currentProject.name}
+                        </span>
+                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                        Switch Project
+                      </div>
+                      <DropdownMenuSeparator />
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => setCurrentProject(project)}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={cn(
+                                "h-2 w-2 rounded-full",
+                                project.color
+                              )}
+                            />
+                            <span>{project.name}</span>
+                          </div>
+                          {currentProject.id === project.id && (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <div className="flex items-center gap-2">
+                    {/* Additional top bar actions can be added here */}
+                  </div>
+                </div>
+              </>
+            ) : null}
+            <ScrollArea className="flex-1 min-h-0">
+              <main className={mainPadding}>{children}</main>
+            </ScrollArea>
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );

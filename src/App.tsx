@@ -34,6 +34,8 @@ import AIAgentPage from "./pages/Ai-Agents/ai-agents";
 import FlowsPage from "./pages/calls/call-flows";
 import CallLogsPage from "./pages/calls/call-logs";
 import EmailFlowsPage from "./pages/email/flows";
+import FlowBuilderPage from "./pages/flows";
+// import FlowBuilderPage from "./pages/calls/[id]";
 
 function App() {
   return (
@@ -53,6 +55,7 @@ function App() {
 
         <Route path="/ai-agent" element={<AIAgentPage />} />
         <Route path="/flows" element={<FlowsPage />} />
+        <Route path="/calls/new" element={<FlowBuilderPage />} />
         <Route path="/call-logs" element={<CallLogsPage />} />
         {/* <Route path="/call/analytics" element={<CallAnalyticsPage />} /> */}
         <Route
