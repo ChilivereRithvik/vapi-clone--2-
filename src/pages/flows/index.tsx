@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ReactFlow, {
   MiniMap,
@@ -12,9 +12,11 @@ import ReactFlow, {
   type Connection,
   type Edge,
   type Node,
+  useReactFlow,
+  ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Save, Code } from "lucide-react";
+import { Save, Code, Copy } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { FlowControls } from "@/components/flow-builder/flowcontrol";
 import { CallTransferNode } from "@/components/flow-builder/call-transfer-node";
@@ -41,7 +43,7 @@ const nodeTypes = {
   webhook: WebhookNode,
 };
 
-export default function FlowBuilderPage() {
+function FlowBuilderContent() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -52,6 +54,9 @@ export default function FlowBuilderPage() {
     []
   );
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [copied, setCopied] = useState(false);
+
+  const reactFlowInstance = useReactFlow();
 
   const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
@@ -76,7 +81,7 @@ export default function FlowBuilderPage() {
   function addNode(type: string, position?: { x: number; y: number }) {
     const newNode: Node = {
       id: `${Date.now()}`,
-      type, // This should be "startNode" for StartNode
+      type,
       data: {
         label: `${type} node`,
         onAddNode: handleAddNode,
@@ -89,6 +94,7 @@ export default function FlowBuilderPage() {
     };
     setNodes((nds) => [...nds, newNode]);
   }
+
   function handleDrop(event: React.DragEvent) {
     event.preventDefault();
     const type = event.dataTransfer.getData("application/reactflow");
@@ -102,7 +108,6 @@ export default function FlowBuilderPage() {
     }
   }
 
-  // Save history on node/edge change
   const saveHistory = (newNodes: Node[], newEdges: Edge[]) => {
     const newHistory = [
       ...history.slice(0, historyIndex + 1),
@@ -146,7 +151,6 @@ export default function FlowBuilderPage() {
     saveHistory(nodes, newEdges);
   };
 
-  // Update existing nodes with action handlers
   const nodesWithHandlers = nodes.map((node) => ({
     ...node,
     data: {
@@ -156,6 +160,41 @@ export default function FlowBuilderPage() {
       onDeleteNode: handleDeleteNode,
     },
   }));
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        onUndo();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "z") {
+        e.preventDefault();
+        onRedo();
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedNode) handleDeleteNode(selectedNode.id);
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "=") {
+        e.preventDefault();
+        reactFlowInstance.zoomIn();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "-") {
+        e.preventDefault();
+        reactFlowInstance.zoomOut();
+      }
+
+      if (e.key.toLowerCase() === "f") {
+        reactFlowInstance.fitView();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onUndo, onRedo, reactFlowInstance, selectedNode, handleDeleteNode]);
 
   return (
     <div className="h-full w-screen">
@@ -192,10 +231,39 @@ export default function FlowBuilderPage() {
             </div>
           )}
 
-          <div className="absolute z-10 m-4 flex space-x-2">
+          <div className="absolute left-4 top-4 z-20 bg-gradient-to-b from-background to-muted/20  rounded-lg shadow p-2 max-w-sm flex flex-col gap-1">
+            <div className="font-semibold text-sm">
+              <span className="font-normal">Unknown work Flow</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span className="font-mono">
+                d1d7ba82-00bb-4e13-99c8-b26ab1fb349f…
+              </span>
+              <Button
+                variant={"ghost"}
+                size={"icon"}
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    "d1d7ba82-00bb-4e13-99c8-b26ab1fb349f"
+                  ); // copy full ID
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500); // reset after 1.5s
+                }}
+                className="rounded hover:bg-gray-200 transition-colors cursor-pointer"
+                // title="Copy full ID"
+                // size={2}
+              >
+                <Copy className="w-2 h-2 text-gray-600" />
+              </Button>
+              {copied && (
+                <span className="text-green-500 text-xs">Copied!</span>
+              )}
+            </div>
+          </div>
+          <div className="absolute left-4 top-26 z-20">
             <NodesPanel />
           </div>
-          {/* Fixed ReactFlow container with proper height and explicit dimensions */}
+
           <div className="h-screen w-full min-h-0">
             <ReactFlow
               nodes={nodesWithHandlers}
@@ -210,20 +278,27 @@ export default function FlowBuilderPage() {
               minZoom={0.1}
               maxZoom={2}
               onDrop={handleDrop}
+              proOptions={{ hideAttribution: true }}
               onDragOver={(event) => {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = "move";
               }}
             >
               <MiniMap position="bottom-left" />
-
               <FlowControls onUndo={onUndo} onRedo={onRedo} />
-              {/* <Controls /> */}
               <Background gap={12} size={1} />
             </ReactFlow>
           </div>
         </div>
       </DashboardLayout>
     </div>
+  );
+}
+
+export default function FlowBuilderPage() {
+  return (
+    <ReactFlowProvider>
+      <FlowBuilderContent />
+    </ReactFlowProvider>
   );
 }

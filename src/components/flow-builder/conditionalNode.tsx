@@ -32,11 +32,13 @@ import {
 } from "@/components/ui/select";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { NodeWithActions } from "./node-with-actions";
 
 export function ConditionalNode({ data }: { data: any }) {
   const isActive = data?.isActive;
 
   return (
+    // <NodeWithActions data={data} type="condition">
     <Card
       className={cn(
         "relative min-w-[220px] border-2 bg-card px-4 py-4 transition-all duration-300 ease-in-out",
@@ -109,6 +111,7 @@ export function ConditionalNode({ data }: { data: any }) {
         </div>
       </div>
     </Card>
+    // </NodeWithActions>
   );
 }
 
