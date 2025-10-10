@@ -24,6 +24,9 @@ import { StartNode } from "@/components/flow-builder/start-node";
 import { NodesPanel } from "@/components/flow-builder/nodesPanel";
 import { EmailNode } from "@/components/flow-builder/emailNode";
 import { NodeForm } from "@/components/flow-builder/nodeForm";
+import { ConditionalNode } from "@/components/flow-builder/conditionalNode";
+import { RouterNode } from "@/components/flow-builder/routerNode";
+import { ModelNode } from "@/components/flow-builder/modelNode";
 
 const nodeTypes = {
   callTransfer: CallTransferNode,
@@ -31,6 +34,9 @@ const nodeTypes = {
   apiRequest: ApiRequestNode,
   startNode: StartNode,
   email: EmailNode,
+  condition: ConditionalNode,
+  route: RouterNode,
+  model: ModelNode,
 };
 
 export default function FlowBuilderPage() {
@@ -143,6 +149,7 @@ export default function FlowBuilderPage() {
     ...node,
     data: {
       ...node.data,
+      id: node.id,
       onAddNode: handleAddNode,
       onDeleteNode: handleDeleteNode,
     },
@@ -164,10 +171,7 @@ export default function FlowBuilderPage() {
           </div>
 
           {sheetOpen && selectedNode && (
-            <div
-              className="absolute right-4 top-20 z-30 bg-white rounded-lg shadow-lg p-6 w-[350px] max-w-full"
-              style={{ minWidth: 300 }}
-            >
+            <div className="absolute right-4 top-20 z-30 bg-white rounded-lg shadow-lg p-3 w-[350px] max-w-full">
               <NodeForm
                 node={selectedNode}
                 type={selectedNode?.type}

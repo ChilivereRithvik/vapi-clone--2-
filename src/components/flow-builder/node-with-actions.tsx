@@ -13,22 +13,25 @@ export function NodeWithActions({
   children: React.ReactNode;
 }) {
   const [isHovered, setIsHovered] = useState(false);
-  console.log("Node data:", data);
-  console.log("Node type:", type);
 
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative"
+      className="relative flex items-center gap-2"
     >
-      <Handle type="target" position={Position.Top} className="w-3 h-3" />
-      {children}
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3" />
+      {/* Node container */}
+      <div className="relative">
+        <Handle type="target" position={Position.Top} className="w-3 h-3" />
+        {children}
+        <Handle type="source" position={Position.Bottom} className="w-3 h-3" />
+      </div>
 
-      {isHovered && (
-        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex gap-2 bg-background border rounded-md shadow-lg p-1">
-          <Button
+      {/* Node Actions - placed beside the node */}
+      {/* {isHovered && ( */}
+      <div className="flex flex-col gap-1 bg-background border rounded-md ">
+        {/* Uncomment if you want Add button */}
+        {/* <Button
             size="sm"
             variant="ghost"
             className="h-8 w-8 p-0"
@@ -38,20 +41,21 @@ export function NodeWithActions({
             }}
           >
             <Plus className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              data.onDeleteNode?.(data.id);
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+          </Button> */}
+
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-6 w-6  text-destructive hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            data.onDeleteNode?.(data.id);
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+      {/* )} */}
     </div>
   );
 }

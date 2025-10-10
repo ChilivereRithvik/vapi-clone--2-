@@ -1,18 +1,93 @@
 import { Phone } from "lucide-react";
 import { Card } from "../ui/card";
 import { NodeWithActions } from "./node-with-actions";
+import { z } from "zod";
 
-interface phoneNumber {
-  phoneNumber: string;
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+("use client");
 
-interface callTransferNodeData {
-  nodeType: string;
-  destination: {
-    phoneNumber?: string;
-    SIP?: string;
-  };
-}
+import React from "react";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+// import { z } from "zod";
+
+import { Form } from "@/components/ui/form";
+import { DestinationSection, MessageSection } from "./destinationForm";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+
+type FormValues = z.infer<typeof callTransferNodeSchema>;
+
+export const conditionSchema = z.object({
+  parameter: z.string().min(1, "Parameter is required"),
+  operator: z.enum([
+    "equals",
+    "not_equals",
+    "greater_than",
+    "less_than",
+    "includes",
+    "starts_with",
+    "ends_with",
+  ]),
+  value: z.string().min(1, "Value is required"),
+});
+
+export const baseMessageSchema = z.object({
+  content: z.string().optional(),
+  endCallAfterMessage: z.boolean().optional(),
+  conditions: z.array(conditionSchema).optional(),
+});
+
+export const requestStartSchema = z.object({
+  type: z.enum(["default", "none", "custom"]),
+  message: z.string().optional(),
+  waitForMessageBeforeToolCall: z.boolean().optional(),
+  conditions: z.array(conditionSchema).optional(),
+});
+
+export const messageTypeSchema = z.object({
+  requestStart: requestStartSchema,
+  requestComplete: baseMessageSchema,
+  requestFailed: baseMessageSchema,
+  requestResponseDelayed: baseMessageSchema.extend({
+    timingMs: z.number().optional(),
+  }),
+});
+
+export const transferPlanSchema = z.object({
+  transferMode: z.enum(["Blind Transfer", "SIP"]),
+  sipUri: z
+    .string()
+    .url("Must be a valid SIP URI (e.g. sip:user@example.com)")
+    .optional(),
+  messageToCustomer: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const destinationSchema = z.object({
+  type: z.enum(["PhoneNumber", "SIP"]),
+  phoneNumber: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, "Invalid E.164 phone number")
+    .optional(),
+  enforceE164: z.boolean().optional(),
+  extension: z.string().optional(),
+  callerId: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, "Invalid Caller ID")
+    .optional(),
+  messageToCustomer: z.string().optional(),
+  description: z.string().optional(),
+  transferPlan: transferPlanSchema,
+});
+
+export const callTransferNodeSchema = z.object({
+  nodeType: z.literal("TransferCall"),
+  destination: destinationSchema,
+  messages: messageTypeSchema,
+});
+
+export type CallTransferNodeType = z.infer<typeof callTransferNodeSchema>;
 
 export function CallTransferNode({ data }: { data: any }) {
   return (
@@ -29,5 +104,50 @@ export function CallTransferNode({ data }: { data: any }) {
         </div>
       </Card>
     </NodeWithActions>
+  );
+}
+
+//here we are diving the form in two two sections a destination form and a message form and adding the both the form component in to one from for call transfer node form
+
+export default function CallTransferNodeForm() {
+  const methods = useForm<FormValues>({
+    resolver: zodResolver(callTransferNodeSchema),
+    defaultValues: {
+      nodeType: "TransferCall",
+      destination: {
+        type: "PhoneNumber",
+        transferPlan: { transferMode: "Blind Transfer" },
+      },
+      messages: {
+        requestStart: { type: "default" },
+        requestComplete: {},
+        requestFailed: {},
+        requestResponseDelayed: {},
+      },
+    },
+  });
+
+  const onSubmit = (values: FormValues) => {
+    console.log("✅ Valid Form Data:", values);
+  };
+
+  return (
+    <FormProvider {...methods}>
+      <Form {...methods}>
+        <form onSubmit={methods.handleSubmit(onSubmit)}>
+          <ScrollArea className="h-[500px] w-full">
+            {/* <div className="space-y-4"> */}
+            <div className="space-y-6">
+              <DestinationSection />
+              <MessageSection />
+            </div>
+            {/* </div> */}
+          </ScrollArea>
+          <Button type="submit" className="mt-4 w-full">
+            Save Node
+          </Button>
+        </form>
+      </Form>
+    </FormProvider>
   );
 }

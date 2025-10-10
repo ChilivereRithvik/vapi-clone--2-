@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ApinodeForm } from "./api-request-node";
+import { X } from "lucide-react";
+import { ConditionalNodeForm } from "./conditionalNode";
+import CallTransferNodeForm from "./call-transfer-node";
+import StartNodeForm from "./start-node";
+import { ModelNodeForm } from "./modelNode";
 
 export function NodeForm({ type, node, onCancel, onSave }: any) {
   console.log("NodeForm props:", { type, node });
@@ -18,42 +24,12 @@ export function NodeForm({ type, node, onCancel, onSave }: any) {
 
   if (type === "callTransfer") {
     return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="transfer-number">Transfer Phone Number</Label>
-          <Input id="transfer-number" placeholder="+1 (555) 123-4567" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="transfer-message">Transfer Message</Label>
-          <Textarea
-            id="transfer-message"
-            placeholder="Please hold while I transfer you..."
-            rows={3}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="transfer-timeout">Timeout (seconds)</Label>
-          <Input id="transfer-timeout" type="number" defaultValue="30" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="transfer-fallback">Fallback Action</Label>
-          <Select>
-            <SelectTrigger id="transfer-fallback">
-              <SelectValue placeholder="Select fallback" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="voicemail">Send to Voicemail</SelectItem>
-              <SelectItem value="retry">Retry Transfer</SelectItem>
-              <SelectItem value="end">End Call</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={onSave}>Save Configuration</Button>
-        </div>
+      <div>
+        <X
+          className="absolute right-4 top-4 cursor-pointer"
+          onClick={onCancel}
+        />
+        <CallTransferNodeForm />
       </div>
     );
   }
@@ -108,61 +84,49 @@ export function NodeForm({ type, node, onCancel, onSave }: any) {
 
   if (type === "apiRequest") {
     return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="api-url">API Endpoint URL</Label>
-          <Input id="api-url" placeholder="https://api.example.com/endpoint" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="api-method">HTTP Method</Label>
-          <Select>
-            <SelectTrigger id="api-method">
-              <SelectValue placeholder="Select method" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GET">GET</SelectItem>
-              <SelectItem value="POST">POST</SelectItem>
-              <SelectItem value="PUT">PUT</SelectItem>
-              <SelectItem value="DELETE">DELETE</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="api-headers">Headers (JSON)</Label>
-          <Textarea
-            id="api-headers"
-            placeholder='{"Authorization": "Bearer token"}'
-            rows={4}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="api-body">Request Body (JSON)</Label>
-          <Textarea id="api-body" placeholder='{"key": "value"}' rows={4} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="api-timeout">Timeout (seconds)</Label>
-          <Input id="api-timeout" type="number" defaultValue="10" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="api-retry">Retry on Failure</Label>
-          <Select>
-            <SelectTrigger id="api-retry">
-              <SelectValue placeholder="Select retry policy" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No Retry</SelectItem>
-              <SelectItem value="once">Retry Once</SelectItem>
-              <SelectItem value="twice">Retry Twice</SelectItem>
-              <SelectItem value="three">Retry 3 Times</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={onSave}>Save Configuration</Button>
-        </div>
+      <div>
+        <X
+          className="absolute right-4 top-4 cursor-pointer"
+          onClick={onCancel}
+        />
+        <ApinodeForm />
+      </div>
+    );
+  }
+  if (type === "condition") {
+    return (
+      <div>
+        <X
+          className="absolute right-4 top-4 cursor-pointer"
+          onClick={onCancel}
+        />
+        <ConditionalNodeForm onSubmit={onSave} defaultValues={node?.data} />
+      </div>
+    );
+  }
+
+  if (type === "startNode") {
+    return (
+      <div className="relative gap-3">
+        <X
+          className="absolute right-4 top-[-4] cursor-pointer "
+          onClick={onCancel}
+          size={12}
+        />
+        <StartNodeForm />
+      </div>
+    );
+  }
+
+  if (type === "model") {
+    return (
+      <div className="relative gap-3">
+        <X
+          className="absolute right-4 top-[-4] cursor-pointer "
+          onClick={onCancel}
+          size={12}
+        />
+        <ModelNodeForm />
       </div>
     );
   }

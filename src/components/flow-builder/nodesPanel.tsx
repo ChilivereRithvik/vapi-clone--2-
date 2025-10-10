@@ -9,6 +9,9 @@ import {
   Database,
   MessageSquare,
   Search,
+  GitBranch,
+  Route,
+  Bot,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -46,6 +49,26 @@ export function NodesPanel() {
       label: "Email Node",
       icon: Mail,
       color: "text-yellow-500",
+    },
+
+    {
+      id: "condition",
+      label: "Conditional Node",
+      icon: GitBranch,
+      color: "text-orange-500",
+    },
+
+    {
+      id: "route",
+      label: "Router Node",
+      icon: Route,
+      color: "text-orange-500",
+    },
+    {
+      id: "model",
+      label: "Model Node",
+      icon: Bot,
+      color: "text-green-500",
     },
   ];
 

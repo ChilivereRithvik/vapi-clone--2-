@@ -1,7 +1,31 @@
+"use client";
+
 import { Play } from "lucide-react";
 import { Card } from "../ui/card";
 import { NodeWithActions } from "./node-with-actions";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+const formSchema = z.object({
+  type: z.string().min(1),
+  firstMessage: z.string().min(1),
+  prompt: z.string().optional(),
+});
 
 export function StartNode({ data }: { data: any }) {
   const isActive = data?.isActive; // optional flag for active state
@@ -37,5 +61,88 @@ export function StartNode({ data }: { data: any }) {
         </p> */}
       </Card>
     </NodeWithActions>
+  );
+}
+
+export default function StartNodeForm() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      console.log(values);
+      toast(
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+        </pre>
+      );
+    } catch (error) {
+      console.error("Form submission error", error);
+      toast.error("Failed to submit the form. Please try again.");
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 max-w-3xl mx-auto "
+      >
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Node Type</FormLabel>
+              <FormControl>
+                <Input placeholder="Start Node" type="text" {...field} />
+              </FormControl>
+              <FormDescription>
+                Type of the node ex: Start Node ...
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="firstMessage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>First Message</FormLabel>
+              <FormControl>
+                <Input placeholder="hellow there ..." type="text" {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="prompt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prompt</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="You are a Help Full Assistent"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Enter the prompt for this conversation node
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
   );
 }
