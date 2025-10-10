@@ -16,6 +16,7 @@ import { ConditionalNodeForm } from "./conditionalNode";
 import CallTransferNodeForm from "./call-transfer-node";
 import StartNodeForm from "./start-node";
 import { ModelNodeForm } from "./modelNode";
+import WebhookNodeForm from "./webHookNode";
 
 export function NodeForm({ type, node, onCancel, onSave }: any) {
   console.log("NodeForm props:", { type, node });
@@ -122,11 +123,24 @@ export function NodeForm({ type, node, onCancel, onSave }: any) {
     return (
       <div className="relative gap-3">
         <X
-          className="absolute right-4 top-[-4] cursor-pointer "
+          className="float-right top-[-4] cursor-pointer "
           onClick={onCancel}
-          size={12}
+          size={10}
         />
         <ModelNodeForm />
+      </div>
+    );
+  }
+
+  if (type === "webhook") {
+    return (
+      <div className="relative gap-3">
+        <X
+          className="float-right cursor-pointer "
+          onClick={onCancel}
+          size={10}
+        />
+        <WebhookNodeForm />
       </div>
     );
   }

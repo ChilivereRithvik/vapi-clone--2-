@@ -12,6 +12,7 @@ import {
   GitBranch,
   Route,
   Bot,
+  Webhook,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,13 @@ export function NodesPanel() {
       label: "Model Node",
       icon: Bot,
       color: "text-green-500",
+    },
+
+    {
+      id: "webhook",
+      label: "Webhook Node",
+      icon: Webhook,
+      color: "text-blue-500",
     },
   ];
 

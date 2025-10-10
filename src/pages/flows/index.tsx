@@ -27,6 +27,7 @@ import { NodeForm } from "@/components/flow-builder/nodeForm";
 import { ConditionalNode } from "@/components/flow-builder/conditionalNode";
 import { RouterNode } from "@/components/flow-builder/routerNode";
 import { ModelNode } from "@/components/flow-builder/modelNode";
+import { WebhookNode } from "@/components/flow-builder/webHookNode";
 
 const nodeTypes = {
   callTransfer: CallTransferNode,
@@ -37,6 +38,7 @@ const nodeTypes = {
   condition: ConditionalNode,
   route: RouterNode,
   model: ModelNode,
+  webhook: WebhookNode,
 };
 
 export default function FlowBuilderPage() {
