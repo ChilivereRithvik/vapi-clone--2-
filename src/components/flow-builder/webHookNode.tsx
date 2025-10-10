@@ -20,7 +20,14 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "../ui/scroll-area";
 
-export function WebhookNode({ data }: { data: any }) {
+interface WebhookNodeData {
+  label?: string;
+  isActive?: boolean;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function WebhookNode({ data }: { data: WebhookNodeData }) {
   const isActive = data?.isActive;
 
   return (
@@ -63,19 +70,42 @@ const formSchema = z.object({
   header: z.string().min(1).optional(),
 });
 
-export default function WebhookNodeForm() {
+export type WebhookFormValuesType = z.infer<typeof formSchema>;
+
+interface WebhookNodeFormProps {
+  onSubmit?: (values: WebhookFormValuesType) => void;
+  defaultValues?: Partial<WebhookFormValuesType>;
+}
+
+export default function WebhookNodeForm({
+  onSubmit,
+  defaultValues,
+}: WebhookNodeFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      url: defaultValues?.url || "",
+      isAuthonticationRequired:
+        defaultValues?.isAuthonticationRequired || false,
+      authonticationToken: defaultValues?.authonticationToken || "",
+      header: defaultValues?.header || "",
+    },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function handleSubmit(values: z.infer<typeof formSchema>) {
     try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      console.log("Webhook form values:", values);
+      if (onSubmit) {
+        onSubmit(values);
+      } else {
+        toast(
+          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+            <code className="text-white">
+              {JSON.stringify(values, null, 2)}
+            </code>
+          </pre>
+        );
+      }
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
@@ -87,7 +117,7 @@ export default function WebhookNodeForm() {
       <ScrollArea className="h-[600px] w-full rounded-lg">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-3 text-xs"
           >
             <FormField

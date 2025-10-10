@@ -21,13 +21,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const formSchema = z.object({
+export const formSchema = z.object({
   type: z.string().min(1),
   firstMessage: z.string().min(1),
   prompt: z.string().optional(),
 });
 
-export function StartNode({ data }: { data: any }) {
+export type startNodeFormType = z.infer<typeof formSchema>;
+
+interface StartNodeData {
+  label?: string;
+  isActive?: boolean;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function StartNode({ data }: { data: StartNodeData }) {
   const isActive = data?.isActive; // optional flag for active state
 
   return (
@@ -64,19 +73,38 @@ export function StartNode({ data }: { data: any }) {
   );
 }
 
-export default function StartNodeForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
+interface StartNodeFormProps {
+  onSubmit?: (values: startNodeFormType) => void;
+  defaultValues?: Partial<startNodeFormType>;
+}
+
+export default function StartNodeForm({
+  onSubmit,
+  defaultValues,
+}: StartNodeFormProps) {
+  const form = useForm<startNodeFormType>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      type: defaultValues?.type || "",
+      firstMessage: defaultValues?.firstMessage || "",
+      prompt: defaultValues?.prompt || "",
+    },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function handleSubmit(values: startNodeFormType) {
     try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      console.log("StartNode form values:", values);
+      if (onSubmit) {
+        onSubmit(values);
+      } else {
+        toast(
+          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+            <code className="text-white">
+              {JSON.stringify(values, null, 2)}
+            </code>
+          </pre>
+        );
+      }
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
@@ -86,7 +114,7 @@ export default function StartNodeForm() {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-8 max-w-3xl mx-auto "
       >
         <FormField

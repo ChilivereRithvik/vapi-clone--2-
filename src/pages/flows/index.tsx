@@ -30,6 +30,13 @@ import { ConditionalNode } from "@/components/flow-builder/conditionalNode";
 import { RouterNode } from "@/components/flow-builder/routerNode";
 import { ModelNode } from "@/components/flow-builder/modelNode";
 import { WebhookNode } from "@/components/flow-builder/webHookNode";
+import { WhatsAppNode } from "@/components/flow-builder/whatsAppNode";
+import ExportJsonModal from "@/components/flow-builder/ExportJsonModal";
+import {
+  FlowProvider,
+  useFlowContext,
+  type FlowData,
+} from "@/contexts/FlowContext";
 
 const nodeTypes = {
   callTransfer: CallTransferNode,
@@ -41,6 +48,7 @@ const nodeTypes = {
   route: RouterNode,
   model: ModelNode,
   webhook: WebhookNode,
+  whatsApp: WhatsAppNode,
 };
 
 function FlowBuilderContent() {
@@ -55,8 +63,10 @@ function FlowBuilderContent() {
   );
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [copied, setCopied] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const reactFlowInstance = useReactFlow();
+  const { getCompleteFlowData, clearNodeFormData } = useFlowContext();
 
   const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
@@ -74,9 +84,53 @@ function FlowBuilderContent() {
       setEdges((eds) =>
         eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
       );
+      // Clear form data for deleted node
+      clearNodeFormData(nodeId);
     },
-    [setNodes, setEdges]
+    [setNodes, setEdges, clearNodeFormData]
   );
+
+  // Updated save functionality with proper typing
+  const handleSave = useCallback((): void => {
+    const completeFlowData: FlowData = getCompleteFlowData(nodes, edges);
+    console.log("Complete Flow Data with Form Data:", completeFlowData);
+
+    // Save to localStorage
+    localStorage.setItem("flowData", JSON.stringify(completeFlowData));
+
+    // Show success message
+    alert(
+      "Flow saved successfully! Check console for complete data including all form inputs."
+    );
+  }, [nodes, edges, getCompleteFlowData]);
+
+  // Add load functionality
+  // const handleLoadFlow = useCallback((): void => {
+  //   const input: HTMLInputElement = document.createElement("input");
+  //   input.type = "file";
+  //   input.accept = ".json";
+  //   input.onchange = (e: Event) => {
+  //     const file = (e.target as HTMLInputElement).files?.[0];
+  //     if (file) {
+  //       const reader = new FileReader();
+  //       reader.onload = (e: ProgressEvent<FileReader>) => {
+  //         try {
+  //           const jsonData: FlowData = JSON.parse(e.target?.result as string);
+  //           const { nodes: loadedNodes, edges: loadedEdges } =
+  //             loadFlowFromJson(jsonData);
+  //           setNodes(loadedNodes);
+  //           setEdges(loadedEdges);
+  //           console.log("Flow loaded successfully with form data");
+  //         } catch (error) {
+  //           console.error("Error loading flow:", error);
+  //           alert("Error loading flow file");
+  //         }
+  //       };
+  //       reader.readAsText(file);
+  //     }
+  //   };
+  //   input.click();
+  // }, [loadFlowFromJson, setNodes, setEdges]);
 
   function addNode(type: string, position?: { x: number; y: number }) {
     const newNode: Node = {
@@ -135,18 +189,18 @@ function FlowBuilderContent() {
     }
   };
 
-  const handleNodesChange = (changes: any) => {
+  const handleNodesChange = (changes: Parameters<typeof onNodesChange>[0]) => {
     onNodesChange(changes);
     saveHistory(nodes, edges);
   };
 
-  const handleEdgesChange = (changes: any) => {
+  const handleEdgesChange = (changes: Parameters<typeof onEdgesChange>[0]) => {
     onEdgesChange(changes);
     saveHistory(nodes, edges);
   };
 
-  const handleConnect = (connection: Connection) => {
-    const newEdges = addEdge({ ...connection, animated: true }, edges);
+  const handleConnect = (connection: Connection): void => {
+    const newEdges: Edge[] = addEdge({ ...connection, animated: true }, edges);
     setEdges(newEdges);
     saveHistory(nodes, newEdges);
   };
@@ -196,20 +250,49 @@ function FlowBuilderContent() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onUndo, onRedo, reactFlowInstance, selectedNode, handleDeleteNode]);
 
+  // Add handler for applying new JSON
+  const handleApplyJson = useCallback(
+    (newJson: FlowData) => {
+      if (newJson.nodes && newJson.edges) {
+        setNodes(newJson.nodes);
+        setEdges(newJson.edges);
+      }
+    },
+    [setNodes, setEdges]
+  );
+
   return (
     <div className="h-full w-screen">
       <DashboardLayout showNavBar={false} padding="0">
         <div className="flex-1 h-full w-full justify-center items-center">
           <div className="absolute top-4 right-4 z-20 flex flex-row gap-2">
-            <Button className="bg-gray-200 text-black-foreground flex items-center hover:bg-gray-300">
+            <Button
+              onClick={() => setExportModalOpen(true)}
+              className="bg-gray-200 text-black-foreground flex items-center hover:bg-gray-300"
+            >
               <Code className="h-4 w-4" />
-              <span>Code</span>
+              <span>View JSON</span>
             </Button>
             <Button className="bg-primary text-primary-foreground flex items-center ">
               <Save className="h-4 w-4" />
               <span>Publish</span>
             </Button>
+            <Button
+              onClick={handleSave}
+              className="bg-primary text-primary-foreground flex items-center "
+            >
+              <Save className="h-4 w-4" />
+              <span>Save</span>
+            </Button>
           </div>
+
+          <div className="absolute left-4 top-26 z-20"></div>
+          <ExportJsonModal
+            open={exportModalOpen}
+            onClose={() => setExportModalOpen(false)}
+            flowData={getCompleteFlowData(nodes, edges)}
+            onApplyJson={handleApplyJson}
+          />
 
           {sheetOpen && selectedNode && (
             <div className="absolute right-4 top-20 z-30 bg-white rounded-lg shadow-lg p-3 w-[350px] max-w-full">
@@ -298,7 +381,9 @@ function FlowBuilderContent() {
 export default function FlowBuilderPage() {
   return (
     <ReactFlowProvider>
-      <FlowBuilderContent />
+      <FlowProvider>
+        <FlowBuilderContent />
+      </FlowProvider>
     </ReactFlowProvider>
   );
 }

@@ -2,7 +2,14 @@ import { PhoneOff } from "lucide-react";
 import { Card } from "../ui/card";
 import { NodeWithActions } from "./node-with-actions";
 
-export function EndCallNode({ data }: { data: any }) {
+interface EndCallNodeData {
+  label?: string;
+  isActive?: boolean;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function EndCallNode({ data }: { data: EndCallNodeData }) {
   return (
     <NodeWithActions data={data} type="endCall">
       <Card className="min-w-[200px] border-2 border-red-500 bg-card p-4">

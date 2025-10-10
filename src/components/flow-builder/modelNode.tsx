@@ -26,6 +26,7 @@ import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
 import { Textarea } from "../ui/textarea";
 import { ScrollArea } from "../ui/scroll-area";
+import { Button } from "../ui/button";
 
 const modelFormSchema = z.object({
   apiKey: z.string().min(1, "API Key is required"),
@@ -41,9 +42,16 @@ const modelFormSchema = z.object({
   role: z.string().optional(),
 });
 
-type ModelFormValues = z.infer<typeof modelFormSchema>;
+export type ModelFormValuesType = z.infer<typeof modelFormSchema>;
 
-export function ModelNode({ data }: { data: any }) {
+interface ModelNodeData {
+  label?: string;
+  isActive?: boolean;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function ModelNode({ data }: { data: ModelNodeData }) {
   const isActive = data?.isActive;
 
   return (
@@ -74,27 +82,44 @@ export function ModelNode({ data }: { data: any }) {
   );
 }
 
-export function ModelNodeForm({ data }: { data?: any }) {
-  const form = useForm<ModelFormValues>({
+interface ModelNodeFormProps {
+  onSubmit?: (data: ModelFormValuesType) => void;
+  defaultValues?: Partial<ModelFormValuesType>;
+}
+
+export function ModelNodeForm({ onSubmit, defaultValues }: ModelNodeFormProps) {
+  const form = useForm<ModelFormValuesType>({
     resolver: zodResolver(modelFormSchema),
     defaultValues: {
-      apiKey: data?.apiKey ?? "",
-      connection: data?.connection ?? "",
-      model: data?.model ?? "",
-      question: data?.question ?? "",
-      temperature: data?.temperature ?? 1,
-      maxTokens: data?.maxTokens ?? 2048,
-      topP: data?.topP ?? 1,
-      frequencyPenalty: data?.frequencyPenalty ?? 0,
-      presencePenalty: data?.presencePenalty ?? 0,
-      memoryKey: data?.memoryKey ?? "",
-      role: data?.role ?? "",
+      apiKey: defaultValues?.apiKey ?? "",
+      connection: defaultValues?.connection ?? "",
+      model: defaultValues?.model ?? "",
+      question: defaultValues?.question ?? "",
+      temperature: defaultValues?.temperature ?? 1,
+      maxTokens: defaultValues?.maxTokens ?? 2048,
+      topP: defaultValues?.topP ?? 1,
+      frequencyPenalty: defaultValues?.frequencyPenalty ?? 0,
+      presencePenalty: defaultValues?.presencePenalty ?? 0,
+      memoryKey: defaultValues?.memoryKey ?? "",
+      role: defaultValues?.role ?? "",
     },
   });
 
-  const handleChange = (field: keyof ModelFormValues, value: any) => {
+  const handleChange = (
+    field: keyof ModelFormValuesType,
+    value: string | number
+  ) => {
     form.setValue(field, value);
-    if (data?.onChange) data.onChange(field, value);
+    if (onSubmit) {
+      const currentValues = form.getValues();
+      onSubmit({ ...currentValues, [field]: value });
+    }
+  };
+
+  const handleFormSubmit = () => {
+    if (onSubmit) {
+      onSubmit(form.getValues());
+    }
   };
 
   return (
@@ -363,6 +388,16 @@ export function ModelNodeForm({ data }: { data?: any }) {
                 </FormItem>
               )}
             />
+
+            <div className="pt-4">
+              <Button
+                type="button"
+                onClick={handleFormSubmit}
+                className="w-full"
+              >
+                Save Model Configuration
+              </Button>
+            </div>
           </form>
         </Form>
       </ScrollArea>

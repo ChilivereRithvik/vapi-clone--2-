@@ -89,7 +89,14 @@ export const callTransferNodeSchema = z.object({
 
 export type CallTransferNodeType = z.infer<typeof callTransferNodeSchema>;
 
-export function CallTransferNode({ data }: { data: any }) {
+interface CallTransferNodeData {
+  label?: string;
+  isActive?: boolean;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function CallTransferNode({ data }: { data: CallTransferNodeData }) {
   return (
     <NodeWithActions data={data} type="callTransfer">
       <Card className="min-w-[200px] border-2 border-blue-500 bg-card p-4">
@@ -109,7 +116,15 @@ export function CallTransferNode({ data }: { data: any }) {
 
 //here we are diving the form in two two sections a destination form and a message form and adding the both the form component in to one from for call transfer node form
 
-export default function CallTransferNodeForm() {
+interface CallTransferNodeFormProps {
+  onSubmit?: (values: FormValues) => void;
+  defaultValues?: Partial<CallTransferNodeType>;
+}
+
+export default function CallTransferNodeForm({
+  onSubmit,
+  defaultValues,
+}: CallTransferNodeFormProps) {
   const methods = useForm<FormValues>({
     resolver: zodResolver(callTransferNodeSchema),
     defaultValues: {
@@ -117,24 +132,29 @@ export default function CallTransferNodeForm() {
       destination: {
         type: "PhoneNumber",
         transferPlan: { transferMode: "Blind Transfer" },
+        ...defaultValues?.destination,
       },
       messages: {
         requestStart: { type: "default" },
         requestComplete: {},
         requestFailed: {},
         requestResponseDelayed: {},
+        ...defaultValues?.messages,
       },
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log("✅ Valid Form Data:", values);
+  const handleSubmit = (values: FormValues) => {
+    console.log("✅ Valid Call Transfer Form Data:", values);
+    if (onSubmit) {
+      onSubmit(values);
+    }
   };
 
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <form onSubmit={methods.handleSubmit(handleSubmit)}>
           <ScrollArea className="h-[500px] w-full">
             {/* <div className="space-y-4"> */}
             <div className="space-y-6">

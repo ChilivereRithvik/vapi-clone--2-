@@ -32,9 +32,16 @@ import {
 } from "@/components/ui/select";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { NodeWithActions } from "./node-with-actions";
 
-export function ConditionalNode({ data }: { data: any }) {
+interface ConditionalNodeData {
+  label?: string;
+  isActive?: boolean;
+  condition?: string;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function ConditionalNode({ data }: { data: ConditionalNodeData }) {
   const isActive = data?.isActive;
 
   return (
@@ -133,21 +140,22 @@ const conditionSchema = z.object({
 
 export type ConditionFormType = z.infer<typeof conditionSchema>;
 
+interface ConditionalNodeFormProps {
+  onSubmit: (data: ConditionFormType) => void;
+  defaultValues?: Partial<ConditionFormType>;
+}
+
 export function ConditionalNodeForm({
   onSubmit,
   defaultValues,
-}: {
-  onSubmit: SubmitHandler<ConditionFormType>;
-  defaultValues?: Partial<ConditionFormType>;
-}) {
+}: ConditionalNodeFormProps) {
   const form = useForm<ConditionFormType>({
     resolver: zodResolver(conditionSchema),
     defaultValues: {
-      field: "",
-      operator: "equals",
-      value: "",
-      type: "string",
-      ...defaultValues,
+      field: defaultValues?.field || "",
+      operator: defaultValues?.operator || "equals",
+      value: defaultValues?.value || "",
+      type: defaultValues?.type || "string",
     },
   });
 

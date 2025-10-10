@@ -70,6 +70,12 @@ export function NodesPanel() {
       icon: Webhook,
       color: "text-blue-500",
     },
+    {
+      id: "whatsApp",
+      label: "WhatsApp",
+      icon: MessageCircle,
+      color: "text-green-500",
+    },
   ];
 
   const filteredNodes = nodes.filter((node) =>
@@ -86,7 +92,9 @@ export function NodesPanel() {
       {/* Header */}
       <div
         className={`flex items-center gap-2 border-b border-border/40 p-3 ${
-          collapsed ? "justify-center" : "justify-between"
+          collapsed
+            ? "justify-center cursor-pointer  "
+            : "justify-between cursor-pointer"
         }`}
       >
         <div className="flex items-center gap-2">
@@ -167,6 +175,19 @@ export function NodesPanel() {
               )}
         </div>
       </ScrollArea>
+    </div>
+  );
+}
+
+import { MessageCircle } from "lucide-react";
+
+export function WhatsAppIcon() {
+  return (
+    <div className="relative w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+      {/* Message bubble */}
+      <MessageCircle className="absolute w-6 h-6 text-white" />
+      {/* Phone overlay */}
+      <Phone className="absolute w-4 h-4 text-white rotate-45 bottom-1 right-1" />
     </div>
   );
 }

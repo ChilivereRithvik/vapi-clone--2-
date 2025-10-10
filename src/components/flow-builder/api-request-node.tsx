@@ -23,21 +23,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
-// interface JSONObject {
-//   [key: string]: JSONValue;
-// }
-// interface JSONArray extends Array<JSONValue> {}
-
-// interface ApinodeFormType {
-//   type: string;
-//   url: string;
-//   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-//   queryParams: Record<string, string>;
-//   headers: Record<string, string>;
-//   body: JSONValue;
-// }
-
 const keyValueSchema = z.object({
   key: z.string().nonempty("Key is required"),
   value: z.string(),
@@ -52,9 +37,16 @@ const ApinodeFormSchema = z.object({
   body: z.string().optional(), // JSON string
 });
 
-type ApinodeFormType = z.infer<typeof ApinodeFormSchema>;
+export type ApinodeFormType = z.infer<typeof ApinodeFormSchema>;
 
-export function ApiRequestNode({ data }: { data: any }) {
+interface ApiRequestNodeData {
+  label?: string;
+  isActive?: boolean;
+  onAddNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void;
+}
+
+export function ApiRequestNode({ data }: { data: ApiRequestNodeData }) {
   return (
     <NodeWithActions data={data} type="apiRequest">
       <Card className="min-w-[200px] border-2 border-green-500 bg-card p-4">
@@ -72,16 +64,21 @@ export function ApiRequestNode({ data }: { data: any }) {
   );
 }
 
-export function ApinodeForm() {
+interface ApinodeFormProps {
+  onSubmit?: (data: ApinodeFormType) => void;
+  defaultValues?: Partial<ApinodeFormType>;
+}
+
+export function ApinodeForm({ onSubmit, defaultValues }: ApinodeFormProps) {
   const form = useForm<ApinodeFormType>({
     resolver: zodResolver(ApinodeFormSchema),
     defaultValues: {
-      type: "",
-      url: "",
-      method: "GET",
-      queryParams: [{ key: "", value: "" }],
-      headers: [{ key: "", value: "" }],
-      body: "",
+      type: defaultValues?.type || "",
+      url: defaultValues?.url || "",
+      method: defaultValues?.method || "GET",
+      queryParams: defaultValues?.queryParams || [{ key: "", value: "" }],
+      headers: defaultValues?.headers || [{ key: "", value: "" }],
+      body: defaultValues?.body || "",
     },
   });
 
@@ -91,10 +88,17 @@ export function ApinodeForm() {
   });
   const headerArray = useFieldArray({ control: form.control, name: "headers" });
 
-  const onSubmit = (data: ApinodeFormType) => {
+  const handleSubmit = (data: ApinodeFormType) => {
     try {
       const parsedBody = data.body ? JSON.parse(data.body) : {};
-      console.log({ ...data, body: parsedBody });
+      const formData = { ...data, body: parsedBody };
+      console.log("API Request form data:", formData);
+
+      if (onSubmit) {
+        onSubmit(formData);
+      } else {
+        console.log(formData);
+      }
     } catch {
       console.error("Invalid JSON body");
     }
@@ -102,7 +106,7 @@ export function ApinodeForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Type */}
         <FormField
           control={form.control}
