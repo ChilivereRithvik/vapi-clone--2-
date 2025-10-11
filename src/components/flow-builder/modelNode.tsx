@@ -110,10 +110,6 @@ export function ModelNodeForm({ onSubmit, defaultValues }: ModelNodeFormProps) {
     value: string | number
   ) => {
     form.setValue(field, value);
-    if (onSubmit) {
-      const currentValues = form.getValues();
-      onSubmit({ ...currentValues, [field]: value });
-    }
   };
 
   const handleFormSubmit = () => {

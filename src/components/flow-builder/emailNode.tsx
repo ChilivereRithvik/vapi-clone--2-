@@ -97,6 +97,7 @@ export function EmailNode({ data }: { data: EmailNodeData }) {
 }
 
 export function EmailForm({ onSend, defaultValues }: EmailFormProps) {
+  console.log("EmailForm defaultValues:----------->", defaultValues);
   const form = useForm<EmailFormDataType>({
     resolver: zodResolver(emailFormSchema),
     defaultValues: {
@@ -243,12 +244,12 @@ export function EmailForm({ onSend, defaultValues }: EmailFormProps) {
 
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => append({ filename: "", url: "" })}
-            className="mt-2"
+            className="mt-2 float-end"
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Attachment
+            <Plus className=" h-4 w-4" />
+            Add
           </Button>
         </div>
 

@@ -66,7 +66,8 @@ function FlowBuilderContent() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const reactFlowInstance = useReactFlow();
-  const { getCompleteFlowData, clearNodeFormData } = useFlowContext();
+  const { getCompleteFlowData, clearNodeFormData, loadFlowFromJson } =
+    useFlowContext();
 
   const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
@@ -217,6 +218,13 @@ function FlowBuilderContent() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if user is typing in an input field
+      const isTypingInInput =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement ||
+        (e.target as HTMLElement)?.contentEditable === "true";
+
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
         onUndo();
@@ -227,7 +235,8 @@ function FlowBuilderContent() {
         onRedo();
       }
 
-      if (e.key === "Delete" || e.key === "Backspace") {
+      // Only delete nodes if not typing in an input field
+      if (e.key === "Delete" && !isTypingInInput) {
         if (selectedNode) handleDeleteNode(selectedNode.id);
       }
 
@@ -254,11 +263,13 @@ function FlowBuilderContent() {
   const handleApplyJson = useCallback(
     (newJson: FlowData) => {
       if (newJson.nodes && newJson.edges) {
-        setNodes(newJson.nodes);
-        setEdges(newJson.edges);
+        const { nodes: loadedNodes, edges: loadedEdges } =
+          loadFlowFromJson(newJson);
+        setNodes(loadedNodes);
+        setEdges(loadedEdges);
       }
     },
-    [setNodes, setEdges]
+    [loadFlowFromJson, setNodes, setEdges]
   );
 
   return (
@@ -286,7 +297,7 @@ function FlowBuilderContent() {
             </Button>
           </div>
 
-          <div className="absolute left-4 top-26 z-20"></div>
+          {/* <div className="absolute left-4 top-26 z-20"></div> */}
           <ExportJsonModal
             open={exportModalOpen}
             onClose={() => setExportModalOpen(false)}
@@ -295,7 +306,7 @@ function FlowBuilderContent() {
           />
 
           {sheetOpen && selectedNode && (
-            <div className="absolute right-4 top-20 z-30 bg-white rounded-lg shadow-lg p-3 w-[350px] max-w-full">
+            <div className="absolute right-4 top-20 z-30 bg-white rounded-lg shadow-lg p-3 w-[350px] max-w-full h-[80vh] overflow-auto ">
               <NodeForm
                 node={selectedNode}
                 type={selectedNode?.type}

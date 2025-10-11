@@ -1,7 +1,10 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Download, X, Check, Edit2 } from "lucide-react";
 import type { FlowData } from "@/contexts/FlowContext";
+import Editor from "@monaco-editor/react";
 
 type ExportJsonModalProps = {
   open: boolean;
@@ -23,103 +26,53 @@ export default function ExportJsonModal({
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset JSON when modal opens or flowData changes
   useEffect(() => {
     setJsonString(JSON.stringify(flowData, null, 2));
     setIsEditing(false);
     setError(null);
   }, [flowData, open]);
 
+  // ✅ Copy JSON to clipboard
   const handleCopy = () => {
     navigator.clipboard.writeText(jsonString);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // ✅ Download JSON as file
   const handleDownload = () => {
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "flow-data-with-forms.json";
+    a.download = "flow-data.json";
     a.click();
     URL.revokeObjectURL(url);
   };
 
+  // ✅ Apply edited JSON
   const handleApply = () => {
     try {
       const parsed = JSON.parse(jsonString);
       setError(null);
       setIsEditing(false);
-      if (onApplyJson) onApplyJson(parsed);
+      onApplyJson?.(parsed);
     } catch (err) {
       setError("Invalid JSON format");
     }
   };
 
-  const renderJsonWithSyntaxHighlight = (json: string, editable: boolean) => {
-    const lines = json.split("\n");
-    return lines.map((line, index) => {
-      const highlightedLine = line
-        .replace(/"([^"]+)":/g, '<span class="text-blue-500">"$1"</span>:')
-        .replace(
-          /:\s*"([^"]*)"/g,
-          ': <span class="text-green-600 dark:text-green-400">"$1"</span>'
-        )
-        .replace(
-          /:\s*(-?\d+\.?\d*)/g,
-          ': <span class="text-purple-600 dark:text-purple-400">$1</span>'
-        )
-        .replace(
-          /:\s*(true|false)/g,
-          ': <span class="text-purple-600 dark:text-purple-400">$1</span>'
-        )
-        .replace(
-          /:\s*(null)/g,
-          ': <span class="text-purple-600 dark:text-purple-400">$1</span>'
-        );
-
-      if (editable) {
-        return (
-          <div key={index} className="flex">
-            <span className="inline-block w-10 select-none text-right pr-3 text-muted-foreground">
-              {index + 1}
-            </span>
-            <input
-              className="bg-gray-100 font-mono text-sm border-b border-gray-300 focus:border-blue-400 outline-none w-full"
-              value={line}
-              onChange={(e) => {
-                const newLines = [...lines];
-                newLines[index] = e.target.value;
-                setJsonString(newLines.join("\n"));
-                setError(null);
-              }}
-              spellCheck={false}
-            />
-          </div>
-        );
-      }
-
-      return (
-        <div key={index} className="flex">
-          <span className="inline-block w-10 select-none text-right pr-3 text-muted-foreground">
-            {index + 1}
-          </span>
-          <span dangerouslySetInnerHTML={{ __html: highlightedLine }} />
-        </div>
-      );
-    });
-  };
-
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[600px] max-w-[90vw] max-h-[80vh] flex flex-col gap-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
+      <div className="bg-white rounded-xl shadow-2xl w-[50vw] h-[70vh] max-w-[1000px] flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Flow JSON Data</h2>
+        <div className="flex justify-between items-center border-b p-6 pb-4">
+          <h2 className="text-xl font-semibold">Flow JSON Data</h2>
           <button
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 p-1 rounded-md hover:bg-gray-100"
             onClick={onClose}
           >
             <X className="w-5 h-5" />
@@ -127,29 +80,39 @@ export default function ExportJsonModal({
         </div>
 
         {/* Toolbar */}
-        <div className="flex gap-2 justify-start">
+        <div className="flex gap-2 px-6 py-3 border-b bg-gray-50">
           <Button onClick={handleCopy} variant="outline" size="sm">
             {copied ? (
-              <Check className="h-4 w-4 text-green-600" />
+              <>
+                <Check className="h-4 w-4 text-green-600 mr-2" />
+                Copied
+              </>
             ) : (
-              <Copy className="h-4 w-4" />
+              <>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy
+              </>
             )}
           </Button>
+
           <Button onClick={handleDownload} variant="outline" size="sm">
-            <Download className="h-4 w-4" />
+            <Download className="h-4 w-4 mr-2" />
+            Download
           </Button>
+
           {!isEditing ? (
             <Button
               onClick={() => setIsEditing(true)}
               variant="outline"
               size="sm"
             >
-              <Edit2 className="h-4 w-4" />
+              <Edit2 className="h-4 w-4 mr-2" />
+              Edit
             </Button>
           ) : (
-            <>
+            <div className="flex gap-2">
               <Button onClick={handleApply} variant="default" size="sm">
-                Apply
+                Apply Changes
               </Button>
               <Button
                 onClick={() => {
@@ -162,19 +125,76 @@ export default function ExportJsonModal({
               >
                 Cancel
               </Button>
-            </>
+            </div>
+          )}
+
+          {isEditing && (
+            <div className="ml-auto text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-md">
+              Edit mode enabled
+            </div>
           )}
         </div>
 
-        {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
+        {/* Error display */}
+        {error && (
+          <div className="mx-6 mt-3 px-4 py-2 bg-red-50 border border-red-200 rounded-md">
+            <div className="text-red-700 text-sm font-medium">{error}</div>
+          </div>
+        )}
 
-        {/* JSON View / Edit Area */}
-        <div className="bg-gray-100 rounded p-4 overflow-auto flex-1 min-h-0">
-          <pre className="text-sm whitespace-pre-wrap break-all font-mono">
-            {/* {renderJsonWithSyntaxHighlight(jsonString, isEditing)} */}
-
-            {JSON.stringify(jsonString)}
-          </pre>
+        {/* JSON Editor Container */}
+        <div className="flex-1 p-6 pt-3 min-h-0">
+          <div className="h-full border rounded-lg overflow-hidden bg-white">
+            <Editor
+              height="100%"
+              defaultLanguage="json"
+              value={jsonString}
+              theme="vs-dark"
+              options={{
+                fontSize: 14,
+                fontFamily: '"Fira Code", "Consolas", "Monaco", monospace',
+                minimap: { enabled: false },
+                wordWrap: "on",
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                readOnly: !isEditing,
+                lineNumbers: "on",
+                glyphMargin: false,
+                folding: true,
+                lineDecorationsWidth: 0,
+                lineNumbersMinChars: 3,
+                scrollbar: {
+                  vertical: "visible",
+                  horizontal: "visible",
+                  verticalScrollbarSize: 10,
+                  horizontalScrollbarSize: 10,
+                },
+                bracketPairColorization: {
+                  enabled: true,
+                },
+                formatOnPaste: true,
+                formatOnType: true,
+              }}
+              onChange={(value) => {
+                if (isEditing && value !== undefined) {
+                  setJsonString(value);
+                  setError(null);
+                }
+              }}
+              onValidate={(markers) => {
+                if (isEditing && markers.length > 0) {
+                  setError("Invalid JSON syntax - check highlighted errors");
+                } else if (isEditing) {
+                  setError(null);
+                }
+              }}
+              loading={
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-gray-400">Loading editor...</div>
+                </div>
+              }
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export const formSchema = z.object({
-  type: z.string().min(1),
+  // type: z.string().min(1),
   firstMessage: z.string().min(1),
   prompt: z.string().optional(),
 });
@@ -85,7 +85,7 @@ export default function StartNodeForm({
   const form = useForm<startNodeFormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: defaultValues?.type || "",
+      // type: defaultValues?.type || "",
       firstMessage: defaultValues?.firstMessage || "",
       prompt: defaultValues?.prompt || "",
     },
@@ -117,7 +117,7 @@ export default function StartNodeForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-8 max-w-3xl mx-auto "
       >
-        <FormField
+        {/* <FormField
           control={form.control}
           name="type"
           render={({ field }) => (
@@ -132,8 +132,8 @@ export default function StartNodeForm({
               <FormMessage />
             </FormItem>
           )}
-        />
-
+        /> */}
+        {/*  */}
         <FormField
           control={form.control}
           name="firstMessage"

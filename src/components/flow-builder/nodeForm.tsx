@@ -18,6 +18,7 @@ import { EmailForm, EmailFormDataType } from "./emailNode";
 import { ConditionalNodeForm, ConditionFormType } from "./conditionalNode";
 import { ModelFormValuesType, ModelNodeForm } from "./modelNode";
 import WebhookNodeForm, { WebhookFormValuesType } from "./webHookNode";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface NodeFormProps {
   node: Node;
@@ -98,8 +99,8 @@ export function NodeForm({ node, type, onCancel, onSave }: NodeFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg ">
-      <div className="flex items-center justify-between p-4 border-b">
+    <div className="bg-white rounded-lg">
+      <div className="flex items-center justify-between p-1 border-b">
         <h3 className="text-lg font-semibold">
           {type
             ? `${type.charAt(0).toUpperCase() + type.slice(1)} Node`
@@ -110,7 +111,9 @@ export function NodeForm({ node, type, onCancel, onSave }: NodeFormProps) {
         </Button>
       </div>
 
-      <div className="p-4 max-h-[600px] overflow-y-auto">{renderForm()}</div>
+      <ScrollArea className="min-h-[600px] rounded-md">
+        <div className="p-2 ">{renderForm()}</div>
+      </ScrollArea>
     </div>
   );
 }
