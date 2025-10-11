@@ -216,7 +216,7 @@ function FlowBuilderContent() {
     },
   }));
 
-  useEffect(() => {
+  useEffect(() => { 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check if user is typing in an input field
       const isTypingInInput =
