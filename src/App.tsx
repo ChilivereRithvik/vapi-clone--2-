@@ -35,6 +35,12 @@ import FlowsPage from "./pages/calls/call-flows";
 import CallLogsPage from "./pages/calls/call-logs";
 import EmailFlowsPage from "./pages/email/flows";
 import FlowBuilderPage from "./pages/flows";
+import AnalyticsPage from "./pages/citizen-service/analytics";
+import EligibilityPage from "./pages/citizen-service/eligibility";
+import FollowUpsPage from "./pages/citizen-service/follow-ups";
+import SchemesPage from "./pages/citizen-service/schems";
+import AdminPage from "./pages/citizen-service/admin";
+import CitizenServiceCallLogsPage from "./pages/citizen-service/call-logs";
 // import FlowBuilderPage from "./pages/calls/[id]";
 
 function App() {
@@ -52,20 +58,16 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
         <Route path="/overview" element={<OverviewPage />} />
-
         <Route path="/ai-agent" element={<AIAgentPage />} />
         <Route path="/flows" element={<FlowsPage />} />
         <Route path="/calls/new" element={<FlowBuilderPage />} />
         <Route path="/call-logs" element={<CallLogsPage />} />
-        {/* <Route path="/call/analytics" element={<CallAnalyticsPage />} /> */}
         <Route
           path="/call/outbound-campaigns"
           element={<CallOutboundCampaignsPage />}
         />
         <Route path="/call/audit-logs" element={<CallAuditLogsPage />} />
         <Route path="/call/settings" element={<CallSettingsPage />} />
-        {/* <Route path="/email" element={<EmailPage />} /> */}
-        {/* <Route path="/email/analytics" element={<EmailAnalyticsPage />} /> */}
         <Route
           path="/email/outbound-campaigns"
           element={<EmailOutboundCampaignsPage />}
@@ -79,9 +81,22 @@ function App() {
         <Route path="/widgets/audit-logs" element={<WidgetAuditLogsPage />} />
         <Route path="/widgets/settings" element={<WidgetSettingsPage />} />
         <Route path="/audit-logs" element={<CallAuditLogsPage />} />
-        {/* <Route path="/flows" element={<FlowsPage />} />
-        <Route path="/audit-logs" element={<AuditLogsPage />} /> */}
         <Route path="/settings" element={<SettingsPage />} />
+
+        {/* citizen service routes */}
+        <Route path="/citizenservice/dashboard" element={<HomePage />} />
+        <Route
+          path="/citizenservice/call-logs"
+          element={<CitizenServiceCallLogsPage />}
+        />
+        <Route path="/citizenservice/analytics" element={<AnalyticsPage />} />
+        <Route path="/citizenservice/follow-ups" element={<FollowUpsPage />} />
+        <Route path="/citizenservice/admin" element={<AdminPage />} />
+        <Route
+          path="/citizenservice/eligibility"
+          element={<EligibilityPage />}
+        />
+        <Route path="/citizenservice/schemes" element={<SchemesPage />} />
       </Routes>
     </ThemeProvider>
   );

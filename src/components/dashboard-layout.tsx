@@ -44,6 +44,10 @@ import {
   Mail,
   Megaphone,
   LayoutGrid,
+  PhoneCall,
+  ChartArea,
+  User2,
+  UserCircle,
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 
@@ -56,6 +60,17 @@ type NavigationItem = {
 
 const navigation: NavigationItem[] = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
+  {
+    name: "citizen service",
+    href: "/citizenservice/dashboard",
+    icon: LayoutDashboard,
+  },
+  { name: "schemes", href: "/citizenservice/schemes", icon: LayoutDashboard },
+  { name: "Call Logs", href: "/citizenservice/call-logs", icon: PhoneCall },
+  { name: "Analytics", href: "/citizenservice/analytics", icon: ChartArea },
+  { name: "Follow Ups", href: "/citizenservice/follow-ups", icon: PhoneCall },
+  { name: "Eligibility", href: "/citizenservice/eligibility", icon: User2 },
+  { name: "Admin", href: "/citizenservice/admin", icon: UserCircle },
   {
     name: "AI",
     icon: Bot,
@@ -107,6 +122,7 @@ const navigation: NavigationItem[] = [
       { name: "Settings", href: "/widgets/settings", icon: Settings },
     ],
   },
+  //citizen service module
 ];
 
 const projects = [
