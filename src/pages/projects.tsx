@@ -1,8 +1,8 @@
-import { ProjectsLayout } from "@/components/projects/projects-layout"
-import { ProjectCard } from "@/components/projects/project-card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Plus, Search } from "lucide-react"
+import { ProjectsLayout } from "@/components/projects/projects-layout";
+import { ProjectCard } from "@/components/projects/project-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Search } from "lucide-react";
 
 export default function ProjectsPage() {
   const projects = [
@@ -54,7 +54,7 @@ export default function ProjectsPage() {
       lastDeployed: "2d ago",
       production: false,
     },
-  ]
+  ];
 
   return (
     <ProjectsLayout>
@@ -62,7 +62,9 @@ export default function ProjectsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Projects</h1>
-            <p className="text-sm text-muted-foreground">Manage and deploy your projects</p>
+            <p className="text-sm text-muted-foreground">
+              Manage and deploy your projects
+            </p>
           </div>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
@@ -82,5 +84,5 @@ export default function ProjectsPage() {
         </div>
       </div>
     </ProjectsLayout>
-  )
+  );
 }

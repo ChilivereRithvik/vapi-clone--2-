@@ -71,6 +71,7 @@ const navigation: NavigationItem[] = [
   { name: "Follow Ups", href: "/citizenservice/follow-ups", icon: PhoneCall },
   { name: "Eligibility", href: "/citizenservice/eligibility", icon: User2 },
   { name: "Admin", href: "/citizenservice/admin", icon: UserCircle },
+  { name: "Users", href: "/users", icon: User },
   {
     name: "AI",
     icon: Bot,
@@ -137,11 +138,13 @@ export function DashboardLayout({
   showNavBar = true,
   showSidebarOnly = false,
   padding,
+  showScrollbar = true,
 }: {
   children: React.ReactNode;
   showNavBar?: boolean;
   showSidebarOnly?: boolean;
   padding?: string;
+  showScrollbar?: boolean;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -477,9 +480,18 @@ export function DashboardLayout({
                 </div>
               </>
             ) : null}
-            <ScrollArea className="flex-1 min-h-0">
-              <main className={mainPadding}>{children}</main>
-            </ScrollArea>
+
+            {showScrollbar ? (
+              <ScrollArea className="flex-1 min-h-0">
+                <main className={mainPadding}>{children}</main>
+              </ScrollArea>
+            ) : (
+              <div className="flex-1 min-h-0">
+                <main className={cn("flex-1 overflow-auto", mainPadding)}>
+                  {children}
+                </main>
+              </div>
+            )}
           </div>
         )}
       </div>
